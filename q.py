@@ -3,6 +3,15 @@ from scrapy.http import HtmlResponse
 import requests
 from shutil import copyfile
 from datetime import datetime
+import re
+
+def striphtml(data):
+    p1 = re.compile(r'<!--.*?-->')
+    p2 = re.compile(r'<.*?p>')
+    p3 = re.compile(r'<img.*?>')
+    temp = p1.sub('', data)
+    temp2= p2.sub('', temp)
+    return p3.sub('', temp2)
 
 class AppleSpider(scrapy.Spider):
     name = "apple"
@@ -30,7 +39,7 @@ class AppleSpider(scrapy.Spider):
                         url = urls[a],
                         body = requests.get(url=urls[a]).content,
                         )
-                p = (c_response.css('div.ArticleContent_Inner p').getall()[1][3:-300]).strip()
+                p = striphtml(c_response.css('div.ArticleContent_Inner p').getall()[1]).strip()
                 f.write(p.replace("<br>","\n").encode())
                 f.write('\n'.encode())
                 f.write('\n'.encode())
@@ -38,4 +47,4 @@ class AppleSpider(scrapy.Spider):
                 f.write('\n'.encode())
         self.log('Saved file %s' % filename)
         now = datetime.now()
-        copyfile(filename, "col_{}.txt".format(now.strftime("%Y%m%d")))
+        copyfile(filename,"C:\\Users\\tlyeung\\Documents\\apple_col\\col_{}.txt".format(now.strftime("%Y%m%d")))
